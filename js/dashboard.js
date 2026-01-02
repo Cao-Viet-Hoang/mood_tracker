@@ -172,35 +172,237 @@ const DashboardView = {
      * Update summary cards (total entries, week, month, streak)
      */
     updateSummaryCards() {
-        // TODO: Calculate and update summary cards
+        const totalEntries = this.entries.length;
+        const currentStreak = this.calculateCurrentStreak(this.entries);
+        const longestStreak = this.calculateLongestStreak(this.entries);
+
+        // Update summary cards
+        const summaryCards = document.querySelectorAll('.summary-value');
+        if (summaryCards.length >= 4) {
+            // Total Entries
+            summaryCards[0].textContent = totalEntries;
+            
+            // This Week - count entries in last 7 days
+            const today = Utils.getTodayInTimezone();
+            const sevenDaysAgo = new Date(today);
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            const weekKey = Utils.getDateKey(sevenDaysAgo);
+            const weekEntries = this.entries.filter(e => e.dateKey > weekKey).length;
+            summaryCards[1].textContent = weekEntries;
+            
+            // This Month - count entries in current month
+            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+            const monthKey = Utils.getDateKey(monthStart);
+            const monthEntries = this.entries.filter(e => e.dateKey >= monthKey).length;
+            summaryCards[2].textContent = monthEntries;
+            
+            // Current Streak
+            summaryCards[3].textContent = currentStreak;
+        }
+
+        // Update streak info
+        const streakCurrent = document.querySelector('.streak-current');
+        const streakBest = document.querySelector('.streak-best');
+        if (streakCurrent) streakCurrent.textContent = `${currentStreak} days`;
+        if (streakBest) streakBest.textContent = `Best: ${longestStreak} days`;
+        
+        // Update streak bar
+        const streakFill = document.querySelector('.streak-fill');
+        if (streakFill && longestStreak > 0) {
+            const percentage = (currentStreak / longestStreak) * 100;
+            streakFill.style.width = `${percentage}%`;
+        }
     },
 
     /**
      * Update mood distribution bar chart
      */
     updateMoodDistribution() {
-        // TODO: Calculate mood counts and update bar chart
+        const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        this.entries.forEach(entry => {
+            if (counts[entry.moodType] !== undefined) {
+                counts[entry.moodType]++;
+            }
+        });
+
+        const maxCount = Math.max(...Object.values(counts), 1);
+        
+        // Update each bar - bars are in order 1 to 5 in HTML
+        const barItems = document.querySelectorAll('.bar-item');
+        barItems.forEach((barItem, index) => {
+            const moodType = index + 1; // Bars are in order (1 to 5)
+            const count = counts[moodType] || 0;
+            const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+            
+            const fill = barItem.querySelector('.bar-fill');
+            const valueSpan = barItem.querySelector('.bar-value');
+            
+            if (fill) fill.style.height = `${percentage}%`;
+            if (valueSpan) valueSpan.textContent = count;
+        });
     },
 
     /**
      * Update mood trend line chart
      */
     updateMoodTrend() {
-        // TODO: Generate trend line SVG
+        const svg = document.querySelector('#trendChart');
+        if (!svg) return;
+
+        if (!this.entries || this.entries.length === 0) {
+            // Show empty state
+            svg.innerHTML = '<text x="150" y="50" text-anchor="middle" fill="#999">No data available</text>';
+            return;
+        }
+
+        // Group entries by date and calculate average per day
+        const dailyAverages = {};
+        this.entries.forEach(entry => {
+            if (!dailyAverages[entry.dateKey]) {
+                dailyAverages[entry.dateKey] = { sum: 0, count: 0 };
+            }
+            dailyAverages[entry.dateKey].sum += entry.moodType;
+            dailyAverages[entry.dateKey].count++;
+        });
+
+        // Sort by date and create points
+        const sortedDates = Object.keys(dailyAverages).sort();
+        const points = sortedDates.map(date => ({
+            date,
+            mood: dailyAverages[date].sum / dailyAverages[date].count
+        }));
+
+        if (points.length === 0) return;
+
+        // SVG dimensions
+        const width = 300;
+        const height = 100;
+        const padding = 10;
+        const graphWidth = width - (padding * 2);
+        const graphHeight = height - (padding * 2);
+
+        // Calculate scales
+        const xScale = points.length > 1 ? graphWidth / (points.length - 1) : graphWidth / 2;
+        const yMin = 1;
+        const yMax = 5;
+        const yScale = graphHeight / (yMax - yMin);
+
+        // Generate line path
+        let linePath = '';
+        let areaPath = '';
+        points.forEach((point, index) => {
+            const x = padding + (index * xScale);
+            const y = height - padding - ((point.mood - yMin) * yScale);
+            
+            if (index === 0) {
+                linePath = `M ${x},${y}`;
+                areaPath = `M ${x},${height - padding}`;
+            } else {
+                linePath += ` L ${x},${y}`;
+            }
+            areaPath += ` L ${x},${y}`;
+        });
+        
+        // Close area path
+        const lastX = padding + ((points.length - 1) * xScale);
+        areaPath += ` L ${lastX},${height - padding} Z`;
+
+        // Update SVG
+        svg.innerHTML = `
+            <defs>
+                <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#B8E0D2;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:#B8E0D2;stop-opacity:0.1" />
+                </linearGradient>
+            </defs>
+            <path class="trend-area" d="${areaPath}" fill="url(#trendGradient)" />
+            <path class="trend-line" d="${linePath}" fill="none" stroke="var(--primary-color)" stroke-width="2" />
+            ${points.map((point, index) => {
+                const x = padding + (index * xScale);
+                const y = height - padding - ((point.mood - yMin) * yScale);
+                return `<circle cx="${x}" cy="${y}" r="2" fill="var(--primary-color)" />`;
+            }).join('')}
+        `;
     },
 
     /**
      * Update insight cards (dominant mood, best/worst day, weekly trend)
      */
     updateInsights() {
-        // TODO: Calculate insights
+        // Dominant Mood
+        const dominantMood = this.calculateDominantMood(this.entries);
+        const dominantCard = document.querySelector('.insights-grid .insight-card:nth-child(1)');
+        if (dominantCard && dominantMood) {
+            const moodData = Utils.getMoodData(dominantMood.moodType);
+            dominantCard.querySelector('.insight-icon').textContent = moodData.icon;
+            dominantCard.querySelector('.insight-text').textContent = moodData.label;
+            dominantCard.querySelector('.insight-detail').textContent = 
+                `Appeared ${dominantMood.count} times (${dominantMood.percentage}%)`;
+        } else if (dominantCard) {
+            dominantCard.querySelector('.insight-icon').textContent = '—';
+            dominantCard.querySelector('.insight-text').textContent = 'No data';
+            dominantCard.querySelector('.insight-detail').textContent = 'No entries yet';
+        }
+
+        // Best and Worst Days
+        const { best, worst } = this.calculateBestWorstDays(this.entries);
+        
+        const bestCard = document.querySelector('.insights-grid .insight-card:nth-child(2)');
+        if (bestCard && best) {
+            bestCard.querySelector('.insight-text').textContent = best.day;
+            bestCard.querySelector('.insight-detail').textContent = `Avg mood: ${best.avg}`;
+        } else if (bestCard) {
+            bestCard.querySelector('.insight-text').textContent = 'No data';
+            bestCard.querySelector('.insight-detail').textContent = 'No entries yet';
+        }
+
+        const worstCard = document.querySelector('.insights-grid .insight-card:nth-child(3)');
+        if (worstCard && worst) {
+            worstCard.querySelector('.insight-text').textContent = worst.day;
+            worstCard.querySelector('.insight-detail').textContent = `Avg mood: ${worst.avg}`;
+        } else if (worstCard) {
+            worstCard.querySelector('.insight-text').textContent = 'No data';
+            worstCard.querySelector('.insight-detail').textContent = 'No entries yet';
+        }
+
+        // Weekly Trend
+        this.updateWeeklyTrend();
     },
 
     /**
      * Update logging rate circle
      */
     updateLoggingRate() {
-        // TODO: Calculate logging percentage
+        const today = Utils.getTodayInTimezone();
+        let totalDays;
+        
+        // Calculate total days based on range
+        if (this.currentRange === 'month') {
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            totalDays = Math.min(daysInMonth, today.getDate());
+        } else {
+            totalDays = parseInt(this.currentRange);
+        }
+
+        // Count unique dates in entries
+        const uniqueDates = new Set(this.entries.map(e => e.dateKey));
+        const loggedDays = uniqueDates.size;
+        const percentage = totalDays > 0 ? Math.round((loggedDays / totalDays) * 100) : 0;
+
+        // Update circle chart
+        const rateFill = document.querySelector('.rate-fill');
+        const rateText = document.querySelector('.rate-text');
+        const rateDetail = document.querySelector('.rate-detail');
+
+        if (rateFill) {
+            rateFill.setAttribute('stroke-dasharray', `${percentage}, 100`);
+        }
+        if (rateText) {
+            rateText.textContent = `${percentage}%`;
+        }
+        if (rateDetail) {
+            rateDetail.textContent = `${loggedDays} of ${totalDays} days logged`;
+        }
     },
 
     /**
@@ -296,6 +498,54 @@ const DashboardView = {
             count: dominant[1],
             percentage: Math.round((dominant[1] / entries.length) * 100)
         };
+    },
+
+    /**
+     * Update weekly trend comparison
+     */
+    updateWeeklyTrend() {
+        if (!this.entries || this.entries.length === 0) {
+            const trendCard = document.querySelector('.insights-grid .insight-card:nth-child(4)');
+            if (trendCard) {
+                trendCard.querySelector('.insight-text').textContent = 'No data';
+                trendCard.querySelector('.insight-detail').textContent = 'No entries yet';
+                trendCard.querySelector('.insight-content').classList.remove('positive', 'negative');
+            }
+            return;
+        }
+
+        const today = Utils.getTodayInTimezone();
+        const sevenDaysAgo = new Date(today);
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const fourteenDaysAgo = new Date(today);
+        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+        const sevenDaysKey = Utils.getDateKey(sevenDaysAgo);
+        const fourteenDaysKey = Utils.getDateKey(fourteenDaysAgo);
+
+        // Split into current week and previous week
+        const currentWeek = this.entries.filter(e => e.dateKey > sevenDaysKey);
+        const previousWeek = this.entries.filter(e => e.dateKey >= fourteenDaysKey && e.dateKey <= sevenDaysKey);
+
+        const currentAvg = this.calculateAverageMood(currentWeek);
+        const previousAvg = this.calculateAverageMood(previousWeek);
+
+        const trendCard = document.querySelector('.insights-grid .insight-card:nth-child(4)');
+        if (trendCard && currentAvg && previousAvg) {
+            const difference = (currentAvg - previousAvg).toFixed(1);
+            const isPositive = difference >= 0;
+            
+            const content = trendCard.querySelector('.insight-content');
+            content.classList.remove('positive', 'negative');
+            content.classList.add(isPositive ? 'positive' : 'negative');
+
+            trendCard.querySelector('.insight-icon').textContent = isPositive ? '📈' : '📉';
+            trendCard.querySelector('.insight-text').textContent = 
+                `${isPositive ? '+' : ''}${difference}`;
+        } else if (trendCard) {
+            trendCard.querySelector('.insight-text').textContent = 'N/A';
+            trendCard.querySelector('.insight-detail').textContent = 'Not enough data';
+        }
     },
 
     /**
