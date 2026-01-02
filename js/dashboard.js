@@ -91,8 +91,8 @@ const DashboardView = {
                 startDate.setDate(startDate.getDate() - days + 1);
             }
 
-            const startDateKey = Utils.formatDateKey(startDate);
-            const endDateKey = Utils.formatDateKey(today);
+            const startDateKey = Utils.getDateKey(startDate);
+            const endDateKey = Utils.getDateKey(today);
 
             // Query entries for range
             const querySnapshot = await db.collection('accounts')

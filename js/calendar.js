@@ -327,8 +327,8 @@ const CalendarView = {
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
 
-            const startDateKey = Utils.formatDateKey(firstDay);
-            const endDateKey = Utils.formatDateKey(lastDay);
+            const startDateKey = Utils.getDateKey(firstDay);
+            const endDateKey = Utils.getDateKey(lastDay);
 
             // Query entries for current month
             const querySnapshot = await db.collection('accounts')

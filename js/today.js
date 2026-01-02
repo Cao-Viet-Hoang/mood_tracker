@@ -75,7 +75,7 @@ const TodayView = {
 
             const db = FirebaseConfig.getDb();
             const today = Utils.getTodayInTimezone();
-            const dateKey = Utils.formatDateKey(today);
+            const dateKey = Utils.getDateKey(today);
             const note = elements.moodNote.value.trim();
 
             // Create entry object
@@ -178,7 +178,7 @@ const TodayView = {
 
             const db = FirebaseConfig.getDb();
             const today = Utils.getTodayInTimezone();
-            const dateKey = Utils.formatDateKey(today);
+            const dateKey = Utils.getDateKey(today);
 
             // Get entry from Firestore
             const docRef = db.collection('accounts')
