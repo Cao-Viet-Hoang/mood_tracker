@@ -246,12 +246,15 @@ const DashboardView = {
      * Update mood trend line chart
      */
     updateMoodTrend() {
-        const svg = document.querySelector('#trendChart');
+        const trendContainer = document.querySelector('#trendChart');
+        if (!trendContainer) return;
+        
+        const svg = trendContainer.querySelector('svg');
         if (!svg) return;
 
         if (!this.entries || this.entries.length === 0) {
             // Show empty state
-            svg.innerHTML = '<text x="150" y="50" text-anchor="middle" fill="#999">No data available</text>';
+            svg.innerHTML = '<text x="150" y="50" text-anchor="middle" fill="#999" font-size="14">No data available</text>';
             return;
         }
 
@@ -287,41 +290,45 @@ const DashboardView = {
         const yMax = 5;
         const yScale = graphHeight / (yMax - yMin);
 
-        // Generate line path
-        let linePath = '';
-        let areaPath = '';
-        points.forEach((point, index) => {
+        // Mood color mapping - darker colors for better visibility
+        const getMoodColor = (moodValue) => {
+            const roundedMood = Math.round(moodValue);
+            const colors = {
+                1: '#E88888', // Very Bad - Red
+                2: '#E8A868', // Bad - Orange
+                3: '#E8D868', // Okay - Yellow
+                4: '#88C888', // Good - Green
+                5: '#68B8B8'  // Great - Teal
+            };
+            return colors[roundedMood] || '#7EB8A2';
+        };
+
+        // Generate line segments with gradient colors
+        const lineSegments = [];
+        for (let i = 0; i < points.length - 1; i++) {
+            const x1 = padding + (i * xScale);
+            const y1 = height - padding - ((points[i].mood - yMin) * yScale);
+            const x2 = padding + ((i + 1) * xScale);
+            const y2 = height - padding - ((points[i + 1].mood - yMin) * yScale);
+            const avgMood = (points[i].mood + points[i + 1].mood) / 2;
+            const color = getMoodColor(avgMood);
+            
+            lineSegments.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="3" stroke-linecap="round" />`);
+        }
+
+        // Generate circles with mood-specific colors
+        const circles = points.map((point, index) => {
             const x = padding + (index * xScale);
             const y = height - padding - ((point.mood - yMin) * yScale);
-            
-            if (index === 0) {
-                linePath = `M ${x},${y}`;
-                areaPath = `M ${x},${height - padding}`;
-            } else {
-                linePath += ` L ${x},${y}`;
-            }
-            areaPath += ` L ${x},${y}`;
-        });
-        
-        // Close area path
-        const lastX = padding + ((points.length - 1) * xScale);
-        areaPath += ` L ${lastX},${height - padding} Z`;
+            const color = getMoodColor(point.mood);
+            return `<circle cx="${x}" cy="${y}" r="4" fill="${color}" stroke="white" stroke-width="1.5" />`;
+        }).join('');
 
-        // Update SVG
+        // Update SVG with crisp rendering
+        svg.setAttribute('shape-rendering', 'geometricPrecision');
         svg.innerHTML = `
-            <defs>
-                <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style="stop-color:#B8E0D2;stop-opacity:0.8" />
-                    <stop offset="100%" style="stop-color:#B8E0D2;stop-opacity:0.1" />
-                </linearGradient>
-            </defs>
-            <path class="trend-area" d="${areaPath}" fill="url(#trendGradient)" />
-            <path class="trend-line" d="${linePath}" fill="none" stroke="var(--primary-color)" stroke-width="2" />
-            ${points.map((point, index) => {
-                const x = padding + (index * xScale);
-                const y = height - padding - ((point.mood - yMin) * yScale);
-                return `<circle cx="${x}" cy="${y}" r="2" fill="var(--primary-color)" />`;
-            }).join('')}
+            ${lineSegments.join('')}
+            ${circles}
         `;
     },
 

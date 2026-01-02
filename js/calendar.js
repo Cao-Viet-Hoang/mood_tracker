@@ -228,6 +228,11 @@ const CalendarView = {
             return;
         }
 
+        if (!this.selectedDate) {
+            UI.showToast('No date selected', 'error');
+            return;
+        }
+
         const moodType = parseInt(selectedBtn.dataset.mood);
         const note = elements.editNote.value.trim();
 
