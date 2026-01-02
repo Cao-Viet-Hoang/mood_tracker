@@ -85,14 +85,16 @@ const DashboardView = {
                 // Current month
                 startDate = new Date(today.getFullYear(), today.getMonth(), 1);
             } else {
-                // Last N days
+                // Last N days (including today)
                 const days = parseInt(range);
                 startDate = new Date(today);
-                startDate.setDate(startDate.getDate() - days + 1);
+                startDate.setDate(startDate.getDate() - (days - 1));
             }
 
             const startDateKey = Utils.getDateKey(startDate);
             const endDateKey = Utils.getDateKey(today);
+
+            console.log(`Loading range: ${range} days, from ${startDateKey} to ${endDateKey}`);
 
             // Query entries for range
             const querySnapshot = await db.collection('accounts')
@@ -109,7 +111,7 @@ const DashboardView = {
                 entries.push(doc.data());
             });
 
-            console.log(`Loaded ${entries.length} entries for range: ${range}`);
+            console.log(`Loaded ${entries.length} entries for range: ${range} (${startDateKey} to ${endDateKey})`);
             this.updateStats(entries);
         } catch (error) {
             console.error('Error loading data for range:', error);
@@ -344,6 +346,34 @@ const DashboardView = {
             ${lineSegments.join('')}
             ${circles}
         `;
+
+        // Update trend labels with actual date range
+        const trendLabelsContainer = document.querySelector('.trend-labels');
+        if (trendLabelsContainer && points.length > 0) {
+            const firstDate = Utils.parseDateKey(points[0].date);
+            const lastDate = Utils.parseDateKey(points[points.length - 1].date);
+            
+            // Show first, middle, and last dates
+            let labelsHTML = '';
+            if (points.length === 1) {
+                const dateLabel = firstDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                labelsHTML = `<span>${dateLabel}</span>`;
+            } else if (points.length === 2) {
+                const firstLabel = firstDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const lastLabel = lastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                labelsHTML = `<span>${firstLabel}</span><span>${lastLabel}</span>`;
+            } else {
+                const middleIndex = Math.floor(points.length / 2);
+                const middleDate = Utils.parseDateKey(points[middleIndex].date);
+                
+                const firstLabel = firstDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const middleLabel = middleDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const lastLabel = lastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                labelsHTML = `<span>${firstLabel}</span><span>${middleLabel}</span><span>${lastLabel}</span>`;
+            }
+            trendLabelsContainer.innerHTML = labelsHTML;
+        }
     },
 
     /**
