@@ -183,9 +183,38 @@
     padding: var(--spacing-2);
 }
 
+.trend-chart-wrapper {
+    display: flex;
+    align-items: stretch;
+    gap: var(--spacing-2);
+}
+
+.mood-axis {
+    position: relative;
+    min-width: 30px;
+    height: 150px;
+}
+
+.mood-label {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    line-height: 1;
+    text-align: center;
+    user-select: none;
+}
+
+/* Position each mood label to match SVG grid lines */
+.mood-label:nth-child(1) { top: 15px; }  /* 😄 Great - mood 5 */
+.mood-label:nth-child(2) { top: 45px; }  /* 😊 Good - mood 4 */
+.mood-label:nth-child(3) { top: 75px; }  /* 😐 Okay - mood 3 */
+.mood-label:nth-child(4) { top: 105px; } /* 😔 Bad - mood 2 */
+.mood-label:nth-child(5) { top: 135px; } /* 😢 Very Bad - mood 1 */
+
 .trend-line {
-    width: 100%;
-    height: 100px;
+    flex: 1;
+    height: 150px;
 }
 
 .trend-line svg {

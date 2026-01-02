@@ -279,10 +279,16 @@ const DashboardView = {
 
         // SVG dimensions
         const width = 300;
-        const height = 100;
-        const padding = 10;
-        const graphWidth = width - (padding * 2);
-        const graphHeight = height - (padding * 2);
+        const height = 150;
+        const paddingLeft = 10;
+        const paddingRight = 10;
+        const paddingTop = 15;
+        const paddingBottom = 15;
+        const graphWidth = width - paddingLeft - paddingRight;
+        const graphHeight = height - paddingTop - paddingBottom;
+
+        // Update SVG viewBox
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 
         // Calculate scales
         const xScale = points.length > 1 ? graphWidth / (points.length - 1) : graphWidth / 2;
@@ -303,13 +309,20 @@ const DashboardView = {
             return colors[roundedMood] || '#7EB8A2';
         };
 
+        // Draw grid lines (no labels in SVG)
+        const gridLines = [];
+        for (let i = 1; i <= 5; i++) {
+            const y = height - paddingBottom - ((i - yMin) * yScale);
+            gridLines.push(`<line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="#E0E0E0" stroke-width="1" stroke-dasharray="3,3" />`);
+        }
+
         // Generate line segments with gradient colors
         const lineSegments = [];
         for (let i = 0; i < points.length - 1; i++) {
-            const x1 = padding + (i * xScale);
-            const y1 = height - padding - ((points[i].mood - yMin) * yScale);
-            const x2 = padding + ((i + 1) * xScale);
-            const y2 = height - padding - ((points[i + 1].mood - yMin) * yScale);
+            const x1 = paddingLeft + (i * xScale);
+            const y1 = height - paddingBottom - ((points[i].mood - yMin) * yScale);
+            const x2 = paddingLeft + ((i + 1) * xScale);
+            const y2 = height - paddingBottom - ((points[i + 1].mood - yMin) * yScale);
             const avgMood = (points[i].mood + points[i + 1].mood) / 2;
             const color = getMoodColor(avgMood);
             
@@ -318,8 +331,8 @@ const DashboardView = {
 
         // Generate circles with mood-specific colors
         const circles = points.map((point, index) => {
-            const x = padding + (index * xScale);
-            const y = height - padding - ((point.mood - yMin) * yScale);
+            const x = paddingLeft + (index * xScale);
+            const y = height - paddingBottom - ((point.mood - yMin) * yScale);
             const color = getMoodColor(point.mood);
             return `<circle cx="${x}" cy="${y}" r="4" fill="${color}" stroke="white" stroke-width="1.5" />`;
         }).join('');
@@ -327,6 +340,7 @@ const DashboardView = {
         // Update SVG with crisp rendering
         svg.setAttribute('shape-rendering', 'geometricPrecision');
         svg.innerHTML = `
+            ${gridLines.join('')}
             ${lineSegments.join('')}
             ${circles}
         `;
