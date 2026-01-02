@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#E8D5E0">
+    <title>Mood Tracker</title>
+
+    <!-- Google Fonts - Quicksand for modern, soft feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/today.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/navigation.css">
+    <link rel="stylesheet" href="css/states.css">
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal active">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="app-logo">
+                    <span class="logo-icon">🌸</span>
+                    <h1 class="app-title">Mood Tracker</h1>
+                </div>
+                <p class="app-subtitle">Track your daily emotions</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <div class="form-group">
+                    <label for="firebaseConfig">Firebase Config (JSON)</label>
+                    <textarea id="firebaseConfig" name="firebaseConfig" placeholder='Paste your Firebase config JSON here...' rows="4"></textarea>
+                    <span class="form-hint">Only required for first login</span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <span class="btn-text">Sign In</span>
+                    <span class="btn-loader hidden">
+                        <span class="spinner"></span>
+                    </span>
+                </button>
+            </form>
+            <div id="loginError" class="error-message hidden">
+                <span class="error-icon">⚠️</span>
+                <span class="error-text">Invalid credentials</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="app-container hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="header-title">Mood Tracker</h1>
+                <button id="logoutBtn" class="btn-icon" title="Logout">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Today View -->
+            <section id="todayView" class="view active">
+                <div class="view-header">
+                    <h2 class="view-title">Today</h2>
+                    <p class="view-date" id="currentDate">Friday, January 2, 2026</p>
+                </div>
+
+                <div class="today-content">
+                    <!-- Mood Selection -->
+                    <div class="card mood-card">
+                        <h3 class="card-title">How are you feeling?</h3>
+                        <div class="mood-selector">
+                            <button class="mood-btn" data-mood="1" title="Very Bad">
+                                <span class="mood-icon">😢</span>
+                                <span class="mood-label">Very Bad</span>
+                            </button>
+                            <button class="mood-btn" data-mood="2" title="Bad">
+                                <span class="mood-icon">😔</span>
+                                <span class="mood-label">Bad</span>
+                            </button>
+                            <button class="mood-btn" data-mood="3" title="Okay">
+                                <span class="mood-icon">😐</span>
+                                <span class="mood-label">Okay</span>
+                            </button>
+                            <button class="mood-btn" data-mood="4" title="Good">
+                                <span class="mood-icon">😊</span>
+                                <span class="mood-label">Good</span>
+                            </button>
+                            <button class="mood-btn selected" data-mood="5" title="Great">
+                                <span class="mood-icon">😄</span>
+                                <span class="mood-label">Great</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Note Input -->
+                    <div class="card note-card">
+                        <h3 class="card-title">Add a note (optional)</h3>
+                        <textarea id="moodNote" class="note-input" placeholder="What's on your mind today?"></textarea>
+                    </div>
+
+                    <!-- Save Button -->
+                    <button id="saveMoodBtn" class="btn btn-primary btn-block btn-save">
+                        <span class="btn-text">Save Entry</span>
+                        <span class="btn-loader hidden">
+                            <span class="spinner"></span>
+                        </span>
+                    </button>
+
+                    <!-- Current Entry Display (when entry exists) -->
+                    <div id="currentEntry" class="card entry-card hidden">
+                        <div class="entry-header">
+                            <span class="entry-mood-icon">😄</span>
+                            <div class="entry-info">
+                                <span class="entry-mood-label">Great</span>
+                                <span class="entry-time">Saved at 10:30 AM</span>
+                            </div>
+                        </div>
+                        <p class="entry-note">Had a wonderful day! Everything went smoothly.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calendar View -->
+            <section id="calendarView" class="view hidden">
+                <div class="view-header">
+                    <h2 class="view-title">Calendar</h2>
+                    <div class="calendar-nav">
+                        <button class="btn-icon" id="prevMonth">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <span class="calendar-month" id="calendarMonth">January 2026</span>
+                        <button class="btn-icon" id="nextMonth">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="calendar-container">
+                    <div class="calendar-weekdays">
+                        <span>Sun</span>
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Calendar days will be generated by JS -->
+                        <!-- Sample days for UI preview -->
+                        <div class="calendar-day other-month"><span class="day-number">29</span></div>
+                        <div class="calendar-day other-month"><span class="day-number">30</span></div>
+                        <div class="calendar-day other-month"><span class="day-number">31</span></div>
+                        <div class="calendar-day has-mood mood-5"><span class="day-number">1</span><span class="day-mood">😄</span></div>
+                        <div class="calendar-day today has-mood mood-4"><span class="day-number">2</span><span class="day-mood">😊</span></div>
+                        <div class="calendar-day"><span class="day-number">3</span></div>
+                        <div class="calendar-day"><span class="day-number">4</span></div>
+                        <div class="calendar-day has-mood mood-3"><span class="day-number">5</span><span class="day-mood">😐</span></div>
+                        <div class="calendar-day has-mood mood-5"><span class="day-number">6</span><span class="day-mood">😄</span></div>
+                        <div class="calendar-day has-mood mood-4"><span class="day-number">7</span><span class="day-mood">😊</span></div>
+                        <div class="calendar-day has-mood mood-2"><span class="day-number">8</span><span class="day-mood">😔</span></div>
+                        <div class="calendar-day has-mood mood-4"><span class="day-number">9</span><span class="day-mood">😊</span></div>
+                        <div class="calendar-day"><span class="day-number">10</span></div>
+                        <div class="calendar-day has-mood mood-5"><span class="day-number">11</span><span class="day-mood">😄</span></div>
+                        <div class="calendar-day"><span class="day-number">12</span></div>
+                        <div class="calendar-day has-mood mood-3"><span class="day-number">13</span><span class="day-mood">😐</span></div>
+                        <div class="calendar-day has-mood mood-4"><span class="day-number">14</span><span class="day-mood">😊</span></div>
+                        <div class="calendar-day"><span class="day-number">15</span></div>
+                        <div class="calendar-day has-mood mood-5"><span class="day-number">16</span><span class="day-mood">😄</span></div>
+                        <div class="calendar-day has-mood mood-4"><span class="day-number">17</span><span class="day-mood">😊</span></div>
+                        <div class="calendar-day"><span class="day-number">18</span></div>
+                        <div class="calendar-day has-mood mood-1"><span class="day-number">19</span><span class="day-mood">😢</span></div>
+                        <div class="calendar-day has-mood mood-2"><span class="day-number">20</span><span class="day-mood">😔</span></div>
+                        <div class="calendar-day has-mood mood-3"><span class="day-number">21</span><span class="day-mood">😐</span></div>
+                        <div class="calendar-day has-mood mood-4"><span class="day-number">22</span><span class="day-mood">😊</span></div>
+                        <div class="calendar-day has-mood mood-5"><span class="day-number">23</span><span class="day-mood">😄</span></div>
+                        <div class="calendar-day"><span class="day-number">24</span></div>
+                        <div class="calendar-day has-mood mood-4"><span class="day-number">25</span><span class="day-mood">😊</span></div>
+                        <div class="calendar-day"><span class="day-number">26</span></div>
+                        <div class="calendar-day has-mood mood-3"><span class="day-number">27</span><span class="day-mood">😐</span></div>
+                        <div class="calendar-day has-mood mood-5"><span class="day-number">28</span><span class="day-mood">😄</span></div>
+                        <div class="calendar-day has-mood mood-4"><span class="day-number">29</span><span class="day-mood">😊</span></div>
+                        <div class="calendar-day"><span class="day-number">30</span></div>
+                        <div class="calendar-day has-mood mood-5"><span class="day-number">31</span><span class="day-mood">😄</span></div>
+                    </div>
+                </div>
+
+                <!-- Mood Legend -->
+                <div class="mood-legend">
+                    <div class="legend-item"><span class="legend-color mood-bg-1"></span><span>Very Bad</span></div>
+                    <div class="legend-item"><span class="legend-color mood-bg-2"></span><span>Bad</span></div>
+                    <div class="legend-item"><span class="legend-color mood-bg-3"></span><span>Okay</span></div>
+                    <div class="legend-item"><span class="legend-color mood-bg-4"></span><span>Good</span></div>
+                    <div class="legend-item"><span class="legend-color mood-bg-5"></span><span>Great</span></div>
+                </div>
+            </section>
+
+            <!-- Dashboard View -->
+            <section id="dashboardView" class="view hidden">
+                <div class="view-header">
+                    <h2 class="view-title">Insights</h2>
+                    <div class="range-selector">
+                        <select id="dateRange" class="select-input">
+                            <option value="7">Last 7 days</option>
+                            <option value="30" selected>Last 30 days</option>
+                            <option value="month">This month</option>
+                            <option value="custom">Custom range</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Custom Date Range (hidden by default) -->
+                <div id="customRange" class="custom-range hidden">
+                    <div class="date-inputs">
+                        <div class="form-group">
+                            <label for="startDate">From</label>
+                            <input type="date" id="startDate" class="date-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">To</label>
+                            <input type="date" id="endDate" class="date-input">
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" id="applyRange">Apply</button>
+                </div>
+
+                <div class="dashboard-content">
+                    <!-- Summary Cards -->
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <div class="summary-icon">📝</div>
+                            <div class="summary-value">24</div>
+                            <div class="summary-label">Total Entries</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-icon">📅</div>
+                            <div class="summary-value">5</div>
+                            <div class="summary-label">This Week</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-icon">🗓️</div>
+                            <div class="summary-value">18</div>
+                            <div class="summary-label">This Month</div>
+                        </div>
+                        <div class="summary-card highlight">
+                            <div class="summary-icon">🔥</div>
+                            <div class="summary-value">7</div>
+                            <div class="summary-label">Current Streak</div>
+                        </div>
+                    </div>
+
+                    <!-- Streak Progress -->
+                    <div class="card insight-card">
+                        <h3 class="card-title">Streak Progress</h3>
+                        <div class="streak-progress">
+                            <div class="streak-bar">
+                                <div class="streak-fill" style="width: 70%"></div>
+                            </div>
+                            <div class="streak-info">
+                                <span class="streak-current">7 days</span>
+                                <span class="streak-best">Best: 10 days</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mood Distribution Chart -->
+                    <div class="card chart-card">
+                        <h3 class="card-title">Mood Distribution</h3>
+                        <div class="chart-container">
+                            <div class="bar-chart">
+                                <div class="bar-item">
+                                    <div class="bar-fill mood-bg-1" style="height: 10%"></div>
+                                    <span class="bar-label">😢</span>
+                                    <span class="bar-value">2</span>
+                                </div>
+                                <div class="bar-item">
+                                    <div class="bar-fill mood-bg-2" style="height: 15%"></div>
+                                    <span class="bar-label">😔</span>
+                                    <span class="bar-value">3</span>
+                                </div>
+                                <div class="bar-item">
+                                    <div class="bar-fill mood-bg-3" style="height: 25%"></div>
+                                    <span class="bar-label">😐</span>
+                                    <span class="bar-value">5</span>
+                                </div>
+                                <div class="bar-item">
+                                    <div class="bar-fill mood-bg-4" style="height: 40%"></div>
+                                    <span class="bar-label">😊</span>
+                                    <span class="bar-value">8</span>
+                                </div>
+                                <div class="bar-item">
+                                    <div class="bar-fill mood-bg-5" style="height: 30%"></div>
+                                    <span class="bar-label">😄</span>
+                                    <span class="bar-value">6</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mood Trend Chart -->
+                    <div class="card chart-card">
+                        <h3 class="card-title">Mood Trend</h3>
+                        <div class="chart-container trend-chart">
+                            <div class="trend-line" id="trendChart">
+                                <!-- SVG line chart will be generated by JS -->
+                                <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+                                    <defs>
+                                        <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#B8E0D2;stop-opacity:0.8" />
+                                            <stop offset="100%" style="stop-color:#B8E0D2;stop-opacity:0.1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path class="trend-area" d="M0,80 L30,60 L60,70 L90,40 L120,50 L150,30 L180,40 L210,20 L240,35 L270,25 L300,30 L300,100 L0,100 Z" fill="url(#trendGradient)"/>
+                                    <polyline class="trend-path" points="0,80 30,60 60,70 90,40 120,50 150,30 180,40 210,20 240,35 270,25 300,30" fill="none" stroke="#7EB8A2" stroke-width="2"/>
+                                    <g class="trend-dots">
+                                        <circle cx="0" cy="80" r="4" fill="#7EB8A2"/>
+                                        <circle cx="30" cy="60" r="4" fill="#7EB8A2"/>
+                                        <circle cx="60" cy="70" r="4" fill="#7EB8A2"/>
+                                        <circle cx="90" cy="40" r="4" fill="#7EB8A2"/>
+                                        <circle cx="120" cy="50" r="4" fill="#7EB8A2"/>
+                                        <circle cx="150" cy="30" r="4" fill="#7EB8A2"/>
+                                        <circle cx="180" cy="40" r="4" fill="#7EB8A2"/>
+                                        <circle cx="210" cy="20" r="4" fill="#7EB8A2"/>
+                                        <circle cx="240" cy="35" r="4" fill="#7EB8A2"/>
+                                        <circle cx="270" cy="25" r="4" fill="#7EB8A2"/>
+                                        <circle cx="300" cy="30" r="4" fill="#7EB8A2"/>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="trend-labels">
+                                <span>Dec 23</span>
+                                <span>Dec 28</span>
+                                <span>Jan 2</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Insights Grid -->
+                    <div class="insights-grid">
+                        <!-- Dominant Mood -->
+                        <div class="card insight-card">
+                            <h3 class="card-title">Dominant Mood</h3>
+                            <div class="insight-content">
+                                <span class="insight-icon">😊</span>
+                                <span class="insight-text">Good</span>
+                            </div>
+                            <p class="insight-detail">Appeared 8 times (33%)</p>
+                        </div>
+
+                        <!-- Best Day -->
+                        <div class="card insight-card">
+                            <h3 class="card-title">Best Day</h3>
+                            <div class="insight-content">
+                                <span class="insight-icon">🌟</span>
+                                <span class="insight-text">Saturday</span>
+                            </div>
+                            <p class="insight-detail">Avg mood: 4.2</p>
+                        </div>
+
+                        <!-- Worst Day -->
+                        <div class="card insight-card">
+                            <h3 class="card-title">Hardest Day</h3>
+                            <div class="insight-content">
+                                <span class="insight-icon">📉</span>
+                                <span class="insight-text">Monday</span>
+                            </div>
+                            <p class="insight-detail">Avg mood: 2.8</p>
+                        </div>
+
+                        <!-- Week Comparison -->
+                        <div class="card insight-card">
+                            <h3 class="card-title">Weekly Trend</h3>
+                            <div class="insight-content positive">
+                                <span class="insight-icon">📈</span>
+                                <span class="insight-text">+0.5</span>
+                            </div>
+                            <p class="insight-detail">vs previous week</p>
+                        </div>
+                    </div>
+
+                    <!-- Missing Entries -->
+                    <div class="card insight-card">
+                        <h3 class="card-title">Logging Rate</h3>
+                        <div class="logging-rate">
+                            <div class="rate-circle">
+                                <svg viewBox="0 0 36 36">
+                                    <path class="rate-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path class="rate-fill" stroke-dasharray="80, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <text x="18" y="20.35" class="rate-text">80%</text>
+                                </svg>
+                            </div>
+                            <div class="rate-info">
+                                <p class="rate-detail">24 of 30 days logged</p>
+                                <p class="rate-missing">6 entries missing</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-view="today">
+                <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 6v6l4 2"></path>
+                </svg>
+                <span class="nav-label">Today</span>
+            </button>
+            <button class="nav-item" data-view="calendar">
+                <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span class="nav-label">Calendar</span>
+            </button>
+            <button class="nav-item" data-view="dashboard">
+                <svg class="nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                    <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                </svg>
+                <span class="nav-label">Insights</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Edit Entry Modal -->
+    <div id="editModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Entry</h2>
+                <p class="modal-date" id="editDate">January 1, 2026</p>
+                <button class="btn-icon modal-close" id="closeEditModal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="edit-content">
+                <div class="mood-selector">
+                    <button class="mood-btn" data-mood="1" title="Very Bad">
+                        <span class="mood-icon">😢</span>
+                        <span class="mood-label">Very Bad</span>
+                    </button>
+                    <button class="mood-btn" data-mood="2" title="Bad">
+                        <span class="mood-icon">😔</span>
+                        <span class="mood-label">Bad</span>
+                    </button>
+                    <button class="mood-btn" data-mood="3" title="Okay">
+                        <span class="mood-icon">😐</span>
+                        <span class="mood-label">Okay</span>
+                    </button>
+                    <button class="mood-btn" data-mood="4" title="Good">
+                        <span class="mood-icon">😊</span>
+                        <span class="mood-label">Good</span>
+                    </button>
+                    <button class="mood-btn" data-mood="5" title="Great">
+                        <span class="mood-icon">😄</span>
+                        <span class="mood-label">Great</span>
+                    </button>
+                </div>
+                <div class="form-group">
+                    <label for="editNote">Note (optional)</label>
+                    <textarea id="editNote" class="note-input" placeholder="What's on your mind?"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="cancelEdit">Cancel</button>
+                    <button class="btn btn-primary" id="saveEdit">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message">Entry saved successfully!</span>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <div class="spinner large"></div>
+            <p class="loading-text">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- JavaScript Files (order matters) -->
+    <!-- Core utilities -->
+    <script src="js/storage.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ui.js"></script>
+
+    <!-- Firebase -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+
+    <!-- View modules -->
+    <script src="js/navigation.js"></script>
+    <script src="js/today.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/dashboard.js"></script>
+
+    <!-- Main app entry point -->
+    <script src="js/app.js"></script>
+</body>
+</html>

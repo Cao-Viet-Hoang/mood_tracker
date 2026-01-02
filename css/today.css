@@ -1,0 +1,205 @@
+/* =====================================================
+   Today View Styles
+   ===================================================== */
+
+#todayView {
+    padding-bottom: var(--spacing-4);
+}
+
+.today-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+/* Mood Card */
+.mood-card {
+    background: linear-gradient(135deg, var(--color-white) 0%, var(--color-primary-light) 100%);
+}
+
+.mood-card .card-title {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Enhanced Mood Selector for Today */
+#todayView .mood-selector {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--spacing-2);
+}
+
+#todayView .mood-btn {
+    padding: var(--spacing-4) var(--spacing-2);
+    border-radius: var(--radius-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+#todayView .mood-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+#todayView .mood-btn[data-mood="1"]::before {
+    background: linear-gradient(135deg, var(--mood-1-light) 0%, var(--mood-1) 100%);
+}
+
+#todayView .mood-btn[data-mood="2"]::before {
+    background: linear-gradient(135deg, var(--mood-2-light) 0%, var(--mood-2) 100%);
+}
+
+#todayView .mood-btn[data-mood="3"]::before {
+    background: linear-gradient(135deg, var(--mood-3-light) 0%, var(--mood-3) 100%);
+}
+
+#todayView .mood-btn[data-mood="4"]::before {
+    background: linear-gradient(135deg, var(--mood-4-light) 0%, var(--mood-4) 100%);
+}
+
+#todayView .mood-btn[data-mood="5"]::before {
+    background: linear-gradient(135deg, var(--mood-5-light) 0%, var(--mood-5) 100%);
+}
+
+#todayView .mood-btn.selected::before {
+    opacity: 1;
+}
+
+#todayView .mood-btn.selected {
+    border-color: transparent;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+#todayView .mood-icon {
+    font-size: 2.25rem;
+    position: relative;
+    z-index: 1;
+    transition: transform var(--transition-fast);
+}
+
+#todayView .mood-btn:hover .mood-icon {
+    transform: scale(1.1);
+}
+
+#todayView .mood-btn.selected .mood-icon {
+    transform: scale(1.15);
+}
+
+#todayView .mood-label {
+    position: relative;
+    z-index: 1;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Note Card */
+.note-card {
+    background-color: var(--color-white);
+}
+
+.note-card .card-title {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+.note-card .note-input {
+    border: none;
+    background-color: var(--color-gray-50);
+    border-radius: var(--radius-lg);
+}
+
+.note-card .note-input:focus {
+    background-color: var(--color-white);
+    box-shadow: inset 0 0 0 2px var(--color-secondary);
+}
+
+/* Save Button */
+#saveMoodBtn {
+    background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-4) var(--spacing-6);
+    min-height: 56px;
+}
+
+#saveMoodBtn:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--color-secondary-dark) 0%, #5FA088 100%);
+}
+
+/* Current Entry Display */
+#currentEntry {
+    margin-top: var(--spacing-2);
+}
+
+#currentEntry .entry-mood-icon {
+    font-size: 3rem;
+}
+
+/* Quick Actions (future enhancement) */
+.quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-3);
+    margin-top: var(--spacing-4);
+}
+
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    background-color: var(--color-gray-100);
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
+}
+
+.quick-action-btn:hover {
+    background-color: var(--color-gray-200);
+    color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 360px) {
+    #todayView .mood-selector {
+        gap: var(--spacing-1);
+    }
+
+    #todayView .mood-btn {
+        padding: var(--spacing-3) var(--spacing-1);
+    }
+
+    #todayView .mood-icon {
+        font-size: 1.75rem;
+    }
+
+    #todayView .mood-label {
+        font-size: 0.55rem;
+    }
+}
+
+/* Desktop Enhancement */
+@media (min-width: 768px) {
+    #todayView .mood-btn {
+        padding: var(--spacing-5) var(--spacing-3);
+    }
+
+    #todayView .mood-icon {
+        font-size: 2.5rem;
+    }
+
+    #todayView .mood-label {
+        font-size: var(--font-size-xs);
+    }
+}
