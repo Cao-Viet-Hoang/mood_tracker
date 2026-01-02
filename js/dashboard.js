@@ -23,8 +23,8 @@ const DashboardView = {
     /**
      * Refresh Dashboard view
      */
-    refresh() {
-        // TODO: Load data from Firebase and update charts
+    async refresh() {
+        await this.loadDataForRange(this.currentRange);
     },
 
     /**
@@ -69,8 +69,52 @@ const DashboardView = {
      * @param {string} range - Range value ('7', '30', 'month')
      */
     async loadDataForRange(range) {
-        // TODO: Implement Firebase data loading
-        console.log('Loading data for range:', range);
+        try {
+            const userId = Auth.getUserId();
+            if (!userId) {
+                this.updateStats([]);
+                return;
+            }
+
+            const db = FirebaseConfig.getDb();
+            const today = Utils.getTodayInTimezone();
+            let startDate;
+
+            // Calculate start date based on range
+            if (range === 'month') {
+                // Current month
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            } else {
+                // Last N days
+                const days = parseInt(range);
+                startDate = new Date(today);
+                startDate.setDate(startDate.getDate() - days + 1);
+            }
+
+            const startDateKey = Utils.formatDateKey(startDate);
+            const endDateKey = Utils.formatDateKey(today);
+
+            // Query entries for range
+            const querySnapshot = await db.collection('accounts')
+                .doc(userId)
+                .collection('entries')
+                .where('dateKey', '>=', startDateKey)
+                .where('dateKey', '<=', endDateKey)
+                .orderBy('dateKey', 'asc')
+                .get();
+
+            // Build entries array
+            const entries = [];
+            querySnapshot.forEach(doc => {
+                entries.push(doc.data());
+            });
+
+            console.log(`Loaded ${entries.length} entries for range: ${range}`);
+            this.updateStats(entries);
+        } catch (error) {
+            console.error('Error loading data for range:', error);
+            this.updateStats([]);
+        }
     },
 
     /**
@@ -79,8 +123,36 @@ const DashboardView = {
      * @param {string} endDate - End date (YYYY-MM-DD)
      */
     async loadDataForCustomRange(startDate, endDate) {
-        // TODO: Implement Firebase data loading
-        console.log('Loading data for custom range:', startDate, '-', endDate);
+        try {
+            const userId = Auth.getUserId();
+            if (!userId) {
+                this.updateStats([]);
+                return;
+            }
+
+            const db = FirebaseConfig.getDb();
+
+            // Query entries for custom range
+            const querySnapshot = await db.collection('accounts')
+                .doc(userId)
+                .collection('entries')
+                .where('dateKey', '>=', startDate)
+                .where('dateKey', '<=', endDate)
+                .orderBy('dateKey', 'asc')
+                .get();
+
+            // Build entries array
+            const entries = [];
+            querySnapshot.forEach(doc => {
+                entries.push(doc.data());
+            });
+
+            console.log(`Loaded ${entries.length} entries for custom range: ${startDate} - ${endDate}`);
+            this.updateStats(entries);
+        } catch (error) {
+            console.error('Error loading data for custom range:', error);
+            this.updateStats([]);
+        }
     },
 
     /**

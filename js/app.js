@@ -122,10 +122,10 @@ const App = {
             await Auth.login(username, password);
 
             // Login successful - show app
-            this.onLoginSuccess(username);
+            this.onLoginSuccess(Auth.getUsername());
 
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('Auth error:', error);
             this.handleLoginError(error);
         } finally {
             UI.setButtonLoading(submitBtn, false);
@@ -137,18 +137,18 @@ const App = {
      * @param {Error} error - Error object
      */
     handleLoginError(error) {
-        let errorMessage = 'Login failed. Please try again.';
+        let errorMessage = 'Authentication failed. Please try again.';
 
-        if (error.message.includes('Invalid username or password')) {
+        const message = error.message.toLowerCase();
+
+        if (message.includes('invalid username or password')) {
             errorMessage = 'Invalid username or password';
-        } else if (error.message.includes('Cannot connect to server') || error.message.includes('offline')) {
-            errorMessage = 'Cannot connect to database. Please check your internet connection.';
-        } else if (error.message.includes('Firebase')) {
-            errorMessage = 'Firebase connection error. Please check your config.';
-        } else if (error.message.includes('network')) {
+        } else if (message.includes('network')) {
             errorMessage = 'Network error. Please check your connection.';
-        } else if (error.code === 'permission-denied' || error.code === 'PERMISSION_DENIED') {
-            errorMessage = 'Access denied. Please update database security rules.';
+        } else if (message.includes('permission-denied') || message.includes('permission denied')) {
+            errorMessage = 'Access denied. Please contact administrator.';
+        } else if (message.includes('firebase')) {
+            errorMessage = 'Firebase connection error. Please check your config.';
         }
 
         UI.showLoginError(errorMessage);
@@ -181,7 +181,7 @@ const App = {
     /**
      * Handle logout
      */
-    async handleLogout() {
+    handleLogout() {
         const confirmed = confirm('Are you sure you want to logout?');
         if (!confirmed) return;
 
@@ -200,7 +200,7 @@ const App = {
      * @returns {Promise<boolean>} True if auto login successful
      */
     async tryAutoLogin() {
-        if (!Storage.hasUserSession() || !Storage.hasFirebaseConfig()) {
+        if (!Storage.hasFirebaseConfig()) {
             return false;
         }
 
@@ -216,7 +216,6 @@ const App = {
             }
         } catch (error) {
             console.error('Auto login failed:', error);
-            Storage.clearUserSession();
         } finally {
             UI.setLoading(false);
         }

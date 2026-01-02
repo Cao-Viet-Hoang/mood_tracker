@@ -1,6 +1,6 @@
 /**
  * Firebase Configuration Module
- * Handles Firebase initialization and provides Realtime Database reference
+ * Handles Firebase initialization and provides Firestore reference
  */
 
 const FirebaseConfig = {
@@ -15,8 +15,8 @@ const FirebaseConfig = {
      */
     initialize(config) {
         try {
-            // Validate config has required fields
-            const requiredFields = ['apiKey', 'authDomain', 'projectId', 'databaseURL'];
+            // Validate config has required fields (databaseURL is optional for Firestore)
+            const requiredFields = ['apiKey', 'authDomain', 'projectId'];
             for (const field of requiredFields) {
                 if (!config[field]) {
                     throw new Error(`Missing required field: ${field}`);
@@ -31,7 +31,7 @@ const FirebaseConfig = {
 
             // Initialize Firebase
             this.app = firebase.initializeApp(config);
-            this.db = firebase.database();
+            this.db = firebase.firestore();
 
             this.isInitialized = true;
             console.log('Firebase initialized successfully');
@@ -44,8 +44,8 @@ const FirebaseConfig = {
     },
 
     /**
-     * Get Realtime Database reference
-     * @returns {Object} Firebase Realtime Database
+     * Get Firestore reference
+     * @returns {Object} Firebase Firestore
      */
     getDb() {
         if (!this.isInitialized) {
@@ -96,8 +96,8 @@ const FirebaseConfig = {
             }
         }
 
-        // Validate required fields for Realtime Database
-        const requiredFields = ['apiKey', 'authDomain', 'projectId', 'databaseURL'];
+        // Validate required fields for Firestore (databaseURL is optional)
+        const requiredFields = ['apiKey', 'authDomain', 'projectId'];
         for (const field of requiredFields) {
             if (!config[field]) {
                 throw new Error(`Invalid config: missing ${field}`);

@@ -1,7 +1,7 @@
 /**
  * Authentication Module
- * Custom authentication using Firebase Realtime Database
- * Users are stored in accounts/{username} with password field
+ * Custom authentication using Firestore with username/password
+ * Accounts are created by admin only
  */
 
 const Auth = {
@@ -9,7 +9,6 @@ const Auth = {
 
     /**
      * Login with username and password
-     * Validates credentials against Firebase Realtime Database
      * @param {string} username - Username
      * @param {string} password - Password
      * @returns {Promise<Object>} User object on success
@@ -26,34 +25,28 @@ const Auth = {
 
             const db = FirebaseConfig.getDb();
 
-            // Get user data from accounts/{username}
-            const snapshot = await db.ref(`accounts/${username}`).once('value');
+            // Get user account data
+            const accountDoc = await db.collection('accounts').doc(username).get();
 
-            if (!snapshot.exists()) {
+            if (!accountDoc.exists) {
                 throw new Error('Invalid username or password');
             }
 
-            const userData = snapshot.val();
+            const accountData = accountDoc.data();
 
-            // Compare password (plain text comparison as per requirements)
-            // Note: In production, you should use hashed passwords
-            if (userData.password !== password) {
+            // Verify password
+            if (accountData.password !== password) {
                 throw new Error('Invalid username or password');
             }
 
-            // Set current user
             this.currentUser = {
-                username: username,
-                ...userData,
-                password: undefined // Don't store password in memory
+                username: username
             };
 
-            // Save session to localStorage
-            Storage.saveUserSession({
-                username: username
-            });
+            // Save session
+            Storage.saveUserSession({ username });
 
-            console.log('Login successful:', username);
+            console.log('Login successful:', this.currentUser);
             return this.currentUser;
         } catch (error) {
             console.error('Login error:', error);
@@ -95,37 +88,41 @@ const Auth = {
     },
 
     /**
+     * Get current user ID (same as username for this implementation)
+     * @returns {string|null}
+     */
+    getUserId() {
+        return this.currentUser?.username || null;
+    },
+
+    /**
      * Try to restore session from localStorage
      * @returns {Promise<boolean>} True if session restored successfully
      */
     async tryRestoreSession() {
         try {
-            const session = Storage.getUserSession();
             const config = Storage.getFirebaseConfig();
+            const session = Storage.getUserSession();
 
-            if (!session || !config) {
+            if (!config || !session) {
                 return false;
             }
 
             // Initialize Firebase with saved config
             FirebaseConfig.initialize(config);
 
-            // Verify user still exists in database
             const db = FirebaseConfig.getDb();
-            const snapshot = await db.ref(`accounts/${session.username}`).once('value');
 
-            if (!snapshot.exists()) {
-                // User no longer exists, clear session
+            // Verify user still exists
+            const accountDoc = await db.collection('accounts').doc(session.username).get();
+
+            if (!accountDoc.exists) {
                 Storage.clearUserSession();
                 return false;
             }
 
-            // Restore user data
-            const userData = snapshot.val();
             this.currentUser = {
-                username: session.username,
-                ...userData,
-                password: undefined
+                username: session.username
             };
 
             console.log('Session restored for:', session.username);
@@ -147,9 +144,9 @@ const Auth = {
             // Try to initialize Firebase
             FirebaseConfig.initialize(config);
 
-            // Try to access database to verify connection
+            // Try to access Firestore to verify connection
             const db = FirebaseConfig.getDb();
-            await db.ref('.info/connected').once('value');
+            await db.collection('_test').limit(1).get();
 
             return true;
         } catch (error) {

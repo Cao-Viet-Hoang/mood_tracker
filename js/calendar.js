@@ -48,18 +48,20 @@ const CalendarView = {
     /**
      * Refresh Calendar view
      */
-    refresh() {
+    async refresh() {
         this.updateCalendarHeader();
-        // TODO: Regenerate calendar grid with entries from Firebase
+        await this.loadEntries();
+        this.renderCalendar();
     },
 
     /**
      * Navigate to previous/next month
      * @param {number} direction - Direction (-1 for prev, 1 for next)
      */
-    navigateMonth(direction) {
+    async navigateMonth(direction) {
         this.currentDate.setMonth(this.currentDate.getMonth() + direction);
         this.updateCalendarHeader();
+        await this.loadEntries();
         this.renderCalendar();
     },
 
@@ -227,15 +229,43 @@ const CalendarView = {
         }
 
         const moodType = parseInt(selectedBtn.dataset.mood);
-        const note = elements.editNote.value;
+        const note = elements.editNote.value.trim();
 
         // Show loading
         elements.saveEdit.disabled = true;
         elements.saveEdit.textContent = 'Saving...';
 
         try {
-            // TODO: Save to Firebase
-            await new Promise(resolve => setTimeout(resolve, 800));
+            const userId = Auth.getUserId();
+            if (!userId) {
+                throw new Error('Not authenticated');
+            }
+
+            const db = FirebaseConfig.getDb();
+
+            // Create entry object
+            const entry = {
+                dateKey: this.selectedDate,
+                moodType: moodType,
+                note: note || '',
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            // Check if this is a new entry
+            const docRef = db.collection('accounts')
+                .doc(userId)
+                .collection('entries')
+                .doc(this.selectedDate);
+
+            const existingDoc = await docRef.get();
+
+            if (!existingDoc.exists) {
+                // New entry, add createdAt
+                entry.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            }
+
+            // Save to Firestore
+            await docRef.set(entry, { merge: true });
 
             // Update local cache
             this.entries[this.selectedDate] = {
@@ -276,6 +306,50 @@ const CalendarView = {
             month: this.currentDate.getMonth(),
             year: this.currentDate.getFullYear()
         };
+    },
+
+    /**
+     * Load entries from Firestore for current month
+     */
+    async loadEntries() {
+        try {
+            const userId = Auth.getUserId();
+            if (!userId) {
+                this.entries = {};
+                return;
+            }
+
+            const db = FirebaseConfig.getDb();
+            const year = this.currentDate.getFullYear();
+            const month = this.currentDate.getMonth();
+
+            // Get first and last day of current month
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+
+            const startDateKey = Utils.formatDateKey(firstDay);
+            const endDateKey = Utils.formatDateKey(lastDay);
+
+            // Query entries for current month
+            const querySnapshot = await db.collection('accounts')
+                .doc(userId)
+                .collection('entries')
+                .where('dateKey', '>=', startDateKey)
+                .where('dateKey', '<=', endDateKey)
+                .get();
+
+            // Build entries object
+            this.entries = {};
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                this.entries[data.dateKey] = data;
+            });
+
+            console.log(`Loaded ${querySnapshot.size} entries for ${year}-${month + 1}`);
+        } catch (error) {
+            console.error('Error loading entries:', error);
+            this.entries = {};
+        }
     }
 };
 

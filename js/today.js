@@ -28,9 +28,9 @@ const TodayView = {
     /**
      * Refresh Today view
      */
-    refresh() {
+    async refresh() {
         this.updateTodayDate();
-        // TODO: Load existing entry for today from Firebase
+        await this.loadTodayEntry();
     },
 
     /**
@@ -68,8 +68,31 @@ const TodayView = {
         UI.setButtonLoading(elements.saveMoodBtn, true);
 
         try {
-            // TODO: Save to Firebase
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate delay
+            const userId = Auth.getUserId();
+            if (!userId) {
+                throw new Error('Not authenticated');
+            }
+
+            const db = FirebaseConfig.getDb();
+            const today = Utils.getTodayInTimezone();
+            const dateKey = Utils.formatDateKey(today);
+            const note = elements.moodNote.value.trim();
+
+            // Create entry object
+            const entry = {
+                dateKey: dateKey,
+                moodType: this.selectedMood,
+                note: note || '',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            // Save to Firestore: accounts/{userId}/entries/{dateKey}
+            await db.collection('accounts')
+                .doc(userId)
+                .collection('entries')
+                .doc(dateKey)
+                .set(entry, { merge: true });
 
             // Update current entry display
             this.updateCurrentEntry();
@@ -141,6 +164,46 @@ const TodayView = {
         const elements = UI.getElements();
         elements.moodNote.value = '';
         elements.currentEntry.classList.add('hidden');
+    },
+
+    /**
+     * Load existing entry for today from Firestore
+     */
+    async loadTodayEntry() {
+        try {
+            const userId = Auth.getUserId();
+            if (!userId) {
+                return;
+            }
+
+            const db = FirebaseConfig.getDb();
+            const today = Utils.getTodayInTimezone();
+            const dateKey = Utils.formatDateKey(today);
+
+            // Get entry from Firestore
+            const docRef = db.collection('accounts')
+                .doc(userId)
+                .collection('entries')
+                .doc(dateKey);
+
+            const snapshot = await docRef.get();
+
+            if (snapshot.exists) {
+                const entry = snapshot.data();
+
+                // Load mood and note
+                this.setMood(entry.moodType);
+                this.setNote(entry.note);
+
+                // Update current entry display
+                this.updateCurrentEntry();
+            } else {
+                // No entry for today, clear form
+                this.clearForm();
+            }
+        } catch (error) {
+            console.error('Error loading today entry:', error);
+        }
     }
 };
 
