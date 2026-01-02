@@ -174,6 +174,9 @@ const App = {
         CalendarView.init();
         DashboardView.init();
 
+        // Refresh today view to load existing entry
+        TodayView.refresh();
+
         // Show welcome message
         UI.showToast(`Welcome back, ${username}!`);
     },
