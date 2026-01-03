@@ -24,7 +24,7 @@ const Navigation = {
      * Switch to a different view
      * @param {string} viewName - View name ('today' | 'calendar' | 'dashboard' | 'stats')
      */
-    switchView(viewName) {
+    async switchView(viewName) {
         const elements = UI.getElements();
 
         // Update nav items
@@ -32,7 +32,10 @@ const Navigation = {
             item.classList.toggle('active', item.dataset.view === viewName);
         });
 
-        // Update views
+        // Trigger view-specific updates BEFORE showing the view
+        await this.onViewChanged(viewName);
+
+        // Update views AFTER data is loaded
         elements.todayView.classList.toggle('active', viewName === 'today');
         elements.todayView.classList.toggle('hidden', viewName !== 'today');
 
@@ -46,28 +49,25 @@ const Navigation = {
         elements.statsView.classList.toggle('hidden', viewName !== 'stats');
 
         this.currentView = viewName;
-
-        // Trigger view-specific updates
-        this.onViewChanged(viewName);
     },
 
     /**
      * Called when view changes
      * @param {string} viewName - New view name
      */
-    onViewChanged(viewName) {
+    async onViewChanged(viewName) {
         switch (viewName) {
             case 'today':
-                TodayView.refresh();
+                await TodayView.refresh();
                 break;
             case 'calendar':
-                CalendarView.refresh();
+                await CalendarView.refresh();
                 break;
             case 'dashboard':
-                DashboardView.refresh();
+                await DashboardView.refresh();
                 break;
             case 'stats':
-                StatsView.refresh();
+                await StatsView.refresh();
                 break;
         }
     },

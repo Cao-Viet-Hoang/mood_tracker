@@ -41,15 +41,19 @@ const CalendarView = {
             });
         });
 
-        // Initial render
-        this.updateCalendarHeader();
+        // Reset to current month on initialization
+        this.currentDate = new Date();
     },
 
     /**
      * Refresh Calendar view
      */
     async refresh() {
+        // Reset to current month when refreshing
+        this.currentDate = new Date();
         this.updateCalendarHeader();
+        
+        // Load entries first, then render (prevents flickering)
         await this.loadEntries();
         this.renderCalendar();
     },
