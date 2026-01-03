@@ -7,11 +7,18 @@ const CalendarView = {
     currentDate: new Date(),
     selectedDate: null,
     entries: {}, // Cache for mood entries
+    initialized: false, // Track initialization state
 
     /**
      * Initialize Calendar view
      */
     init() {
+        // Prevent multiple initializations
+        if (this.initialized) {
+            return;
+        }
+        this.initialized = true;
+
         const elements = UI.getElements();
 
         // Month navigation
@@ -75,7 +82,7 @@ const CalendarView = {
     updateCalendarHeader() {
         const elements = UI.getElements();
         elements.calendarMonth.textContent = this.currentDate.toLocaleDateString('en-US', {
-            month: 'long',
+            month: 'short',
             year: 'numeric',
             timeZone: Utils.TIMEZONE
         });

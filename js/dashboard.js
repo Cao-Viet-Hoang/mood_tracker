@@ -4,7 +4,7 @@
  */
 
 const DashboardView = {
-    currentRange: '30',
+    currentRange: 'week',
     entries: [],
 
     /**

@@ -49,6 +49,9 @@ const Navigation = {
         elements.statsView.classList.toggle('hidden', viewName !== 'stats');
 
         this.currentView = viewName;
+
+        // Scroll to top AFTER view is switched
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
     /**

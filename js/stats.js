@@ -4,7 +4,7 @@
  */
 
 const StatsView = {
-    currentRange: '30',
+    currentRange: 'week',
     entries: [],
 
     /**
