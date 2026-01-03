@@ -91,6 +91,12 @@ const StatsView = {
             if (range === 'month') {
                 // Current month
                 startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            } else if (range === 'week') {
+                // This week (Monday to Sunday)
+                startDate = new Date(today);
+                const dayOfWeek = startDate.getDay();
+                const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Monday is 1, Sunday is 0
+                startDate.setDate(startDate.getDate() - diff);
             } else {
                 // Last N days (including today)
                 const days = parseInt(range);
