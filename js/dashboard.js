@@ -308,18 +308,35 @@ const DashboardView = {
     calculateCurrentStreak(entries) {
         if (!entries || entries.length === 0) return 0;
 
-        const today = Utils.getDateKey(Utils.getTodayInTimezone());
+        const todayDate = Utils.getTodayInTimezone();
+        const todayDateKey = Utils.getDateKey(todayDate);
+        
+        const yesterdayDate = new Date(todayDate);
+        yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+        const yesterdayDateKey = Utils.getDateKey(yesterdayDate);
+
+        // Create a Set of entry dates for fast lookup
+        const entryDates = new Set(entries.map(e => e.dateKey));
+
+        // Determine starting date for streak calculation
+        let startDateKey;
+        let currentDate;
+        
+        if (entryDates.has(todayDateKey)) {
+            // If today has an entry, start from today
+            startDateKey = todayDateKey;
+            currentDate = new Date(todayDate);
+        } else if (entryDates.has(yesterdayDateKey)) {
+            // If today doesn't have entry but yesterday does, start from yesterday
+            startDateKey = yesterdayDateKey;
+            currentDate = new Date(yesterdayDate);
+        } else {
+            // If neither today nor yesterday has entry, streak is 0
+            return 0;
+        }
+
+        // Count consecutive days backwards from startDateKey
         let streak = 0;
-        let currentDate = new Date(today);
-
-        // Sort entries by date descending
-        const sortedEntries = [...entries].sort((a, b) =>
-            new Date(b.dateKey) - new Date(a.dateKey)
-        );
-
-        const entryDates = new Set(sortedEntries.map(e => e.dateKey));
-
-        // Count consecutive days from today backwards
         while (entryDates.has(Utils.getDateKey(currentDate))) {
             streak++;
             currentDate.setDate(currentDate.getDate() - 1);
