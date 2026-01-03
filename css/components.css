@@ -298,6 +298,11 @@ textarea {
     flex: 1;
 }
 
+/* Edit Modal Content */
+.edit-content .mood-selector {
+    margin-bottom: var(--spacing-5);
+}
+
 /* ==================== Error Message ==================== */
 
 .error-message {
