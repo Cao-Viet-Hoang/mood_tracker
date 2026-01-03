@@ -30,7 +30,23 @@ const TodayView = {
      */
     async refresh() {
         this.updateTodayDate();
+        this.updateFeelingTitle();
         await this.loadTodayEntry();
+    },
+
+    /**
+     * Update the feeling title with user's name
+     */
+    updateFeelingTitle() {
+        const feelingTitle = document.getElementById('feelingTitle');
+        if (feelingTitle) {
+            const displayName = Auth.getDisplayName();
+            if (displayName) {
+                feelingTitle.textContent = `How are you feeling, ${displayName}?`;
+            } else {
+                feelingTitle.textContent = 'How are you feeling?';
+            }
+        }
     },
 
     /**
