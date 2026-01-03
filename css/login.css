@@ -3,7 +3,8 @@
    ===================================================== */
 
 #loginModal .modal-content {
-    max-width: 380px;
+    width: 100%;
+    max-width: 500px;
 }
 
 /* App Logo */
