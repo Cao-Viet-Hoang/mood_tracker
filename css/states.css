@@ -1,0 +1,298 @@
+/* =====================================================
+   State Styles - Loading, Empty, Error States
+   ===================================================== */
+
+/* ==================== Loading Overlay ==================== */
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(250, 247, 248, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-loading);
+    backdrop-filter: blur(4px);
+}
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-4);
+}
+
+.loading-text {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ==================== Empty State ==================== */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-10) var(--spacing-4);
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-4);
+    opacity: 0.6;
+}
+
+.empty-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.empty-description {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+.empty-action {
+    margin-top: var(--spacing-6);
+}
+
+/* ==================== Error State ==================== */
+
+.error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-10) var(--spacing-4);
+    text-align: center;
+}
+
+.error-state-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-4);
+}
+
+.error-state-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.error-state-description {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    max-width: 280px;
+    margin: 0 auto var(--spacing-4);
+}
+
+.error-state-action {
+    margin-top: var(--spacing-4);
+}
+
+/* ==================== Skeleton Loading ==================== */
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--color-gray-100) 25%,
+        var(--color-gray-200) 50%,
+        var(--color-gray-100) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: var(--radius-md);
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-text {
+    height: 1em;
+    margin-bottom: var(--spacing-2);
+}
+
+.skeleton-text:last-child {
+    width: 70%;
+}
+
+.skeleton-title {
+    height: 1.5em;
+    width: 60%;
+    margin-bottom: var(--spacing-3);
+}
+
+.skeleton-card {
+    height: 100px;
+    margin-bottom: var(--spacing-3);
+}
+
+.skeleton-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+/* ==================== Inline States ==================== */
+
+/* Inline Loading */
+.inline-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-4);
+    color: var(--text-secondary);
+}
+
+.inline-loading .spinner {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+}
+
+/* Inline Error */
+.inline-error {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-4);
+    background-color: var(--mood-1-light);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    color: var(--color-error-dark);
+}
+
+.inline-error-icon {
+    flex-shrink: 0;
+}
+
+/* Inline Empty */
+.inline-empty {
+    text-align: center;
+    padding: var(--spacing-6) var(--spacing-4);
+    color: var(--text-tertiary);
+}
+
+.inline-empty-icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-2);
+    opacity: 0.5;
+}
+
+.inline-empty-text {
+    font-size: var(--font-size-sm);
+}
+
+/* ==================== Connection Status ==================== */
+
+.connection-status {
+    position: fixed;
+    top: var(--spacing-2);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--spacing-2) var(--spacing-4);
+    background-color: var(--color-warning);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    z-index: var(--z-toast);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-base);
+}
+
+.connection-status.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.connection-status.offline {
+    background-color: var(--color-error);
+    color: var(--text-inverse);
+}
+
+.connection-status.online {
+    background-color: var(--color-success);
+}
+
+/* ==================== Pulse Animation ==================== */
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ==================== Fade Transitions ==================== */
+
+.fade-enter {
+    opacity: 0;
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transition: opacity var(--transition-base);
+}
+
+.fade-exit {
+    opacity: 1;
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+/* ==================== Slide Transitions ==================== */
+
+.slide-up-enter {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.slide-up-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all var(--transition-base);
+}
+
+.slide-up-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-up-exit-active {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all var(--transition-base);
+}

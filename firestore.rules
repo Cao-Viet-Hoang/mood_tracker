@@ -1,0 +1,51 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ⚠️ WARNING: These rules allow public read access for login validation
+    // Accounts can only be created by admin (through Firebase Console or Admin SDK)
+    // Users cannot register themselves through the app
+
+    // Accounts collection - stores user credentials and data
+    match /accounts/{username} {
+      // Allow anyone to read accounts (needed for login validation)
+      allow read: if true;
+
+      // Allow anyone to update 'streaks' and 'displayName' fields
+      // Note: Client-side authentication ensures only logged-in users can update
+      // Streaks object contains: currentStreak, longestStreak, lastCalculated
+      allow update: if (
+                      // Allow updating streaks field only
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['streaks'])
+                       && request.resource.data.streaks is map
+                       && request.resource.data.streaks.keys().hasAll(['currentStreak', 'longestStreak', 'lastCalculated'])
+                       && request.resource.data.streaks.currentStreak is int
+                       && request.resource.data.streaks.longestStreak is int
+                       && request.resource.data.streaks.lastCalculated is timestamp)
+                      ||
+                      // Allow updating displayName field only
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName'])
+                       && request.resource.data.displayName is string
+                       && request.resource.data.displayName.size() > 0
+                       && request.resource.data.displayName.size() <= 50)
+                    );
+
+      // Prevent account creation and deletion from client
+      // Accounts should only be created by admin
+      allow create, delete: if false;
+
+      // Entries subcollection
+      match /entries/{dateKey} {
+        // Allow read/write for all entries
+        // Client-side will enforce user isolation
+        allow read, write: if true;
+      }
+    }
+
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

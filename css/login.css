@@ -1,0 +1,180 @@
+/* =====================================================
+   Login Modal Styles
+   ===================================================== */
+
+#loginModal .modal-content {
+    width: 100%;
+    max-width: 500px;
+}
+
+/* App Logo */
+.app-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-2);
+}
+
+.logo-icon {
+    font-size: 2.5rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.app-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    background: linear-gradient(135deg, var(--color-secondary-dark) 0%, var(--color-primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.app-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    margin: 0;
+}
+
+/* Login Form */
+.login-form {
+    margin-top: var(--spacing-6);
+}
+
+.login-form .form-group {
+    margin-bottom: var(--spacing-4);
+}
+
+.login-form textarea {
+    min-height: 80px;
+    font-size: var(--font-size-sm);
+    font-family: 'Courier New', monospace;
+}
+
+/* Decorative Elements */
+#loginModal::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 30%, var(--color-primary-light) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, var(--color-secondary-light) 0%, transparent 50%);
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+}
+
+#loginModal .modal-overlay {
+    background: linear-gradient(135deg,
+        rgba(232, 213, 224, 0.9) 0%,
+        rgba(184, 224, 210, 0.9) 50%,
+        rgba(212, 229, 247, 0.9) 100%);
+}
+
+/* Input Icons (optional enhancement) */
+.login-form .form-group {
+    position: relative;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    padding-left: var(--spacing-4);
+}
+
+/* Password visibility toggle could be added here */
+
+/* Error state for inputs */
+.login-form input.error,
+.login-form textarea.error {
+    border-color: var(--color-error);
+    background-color: var(--mood-1-light);
+}
+
+.login-form input.error:focus,
+.login-form textarea.error:focus {
+    box-shadow: 0 0 0 3px rgba(232, 160, 160, 0.3);
+}
+
+/* Success state */
+.login-form input.success {
+    border-color: var(--color-success);
+}
+
+/* =====================================================
+   Display Name Modal Styles
+   ===================================================== */
+
+#displayNameModal .modal-content {
+    width: 100%;
+    max-width: 500px;
+}
+
+#displayNameModal .modal-subtitle {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    margin: var(--spacing-2) 0 0 0;
+}
+
+.display-name-form {
+    margin-top: var(--spacing-6);
+}
+
+.display-name-form .form-input {
+    width: 100%;
+    padding: var(--spacing-3) var(--spacing-4);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    font-family: var(--font-primary);
+    background-color: var(--color-background);
+    transition: all var(--transition-fast);
+    text-align: center;
+    font-weight: var(--font-weight-medium);
+}
+
+.display-name-form .form-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(184, 224, 210, 0.3);
+}
+
+.display-name-form .form-input::placeholder {
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-normal);
+}
+
+.display-name-form #displayNameError {
+    margin-top: var(--spacing-3);
+    margin-bottom: var(--spacing-3);
+}
+
+.display-name-form .btn-block {
+    margin-top: var(--spacing-3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+    #loginModal .modal-content {
+        padding: var(--spacing-5);
+        border-radius: var(--radius-xl);
+    }
+
+    .logo-icon {
+        font-size: 2rem;
+    }
+
+    .app-title {
+        font-size: var(--font-size-xl);
+    }
+}
