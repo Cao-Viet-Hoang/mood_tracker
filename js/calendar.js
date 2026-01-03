@@ -256,22 +256,14 @@ const CalendarView = {
             const entry = {
                 dateKey: this.selectedDate,
                 moodType: moodType,
-                note: note || '',
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                note: note || ''
             };
 
-            // Check if this is a new entry
+            // Save to Firestore
             const docRef = db.collection('accounts')
                 .doc(userId)
                 .collection('entries')
                 .doc(this.selectedDate);
-
-            const existingDoc = await docRef.get();
-
-            if (!existingDoc.exists) {
-                // New entry, add createdAt
-                entry.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-            }
 
             // Save to Firestore
             await docRef.set(entry, { merge: true });
