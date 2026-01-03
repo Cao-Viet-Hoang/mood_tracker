@@ -71,6 +71,7 @@
     position: relative;
     background-color: transparent;
     -webkit-tap-highlight-color: transparent;
+    overflow: visible;
 }
 
 .calendar-day:hover {
@@ -92,7 +93,8 @@
 /* Day Mood Icon */
 .day-mood {
     font-size: 1rem;
-    line-height: 1;
+    line-height: 1.2;
+    display: block;
 }
 
 /* Other Month Days */
@@ -108,6 +110,7 @@
 /* Today */
 .calendar-day.today {
     background-color: var(--color-primary-light);
+    box-shadow: inset 0 0 0 2px var(--color-primary-dark);
 }
 
 .calendar-day.today .day-number {
@@ -115,16 +118,17 @@
     font-weight: var(--font-weight-bold);
 }
 
+/* Keep the dot indicator but make it more visible at the top */
 .calendar-day.today::after {
     content: '';
     position: absolute;
-    bottom: 4px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
+    top: 2px;
+    right: 2px;
+    width: 6px;
+    height: 6px;
     background-color: var(--color-primary-dark);
     border-radius: 50%;
+    border: 1px solid var(--bg-card);
 }
 
 /* Has Mood Entry */
