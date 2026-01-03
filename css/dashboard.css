@@ -307,7 +307,7 @@
 }
 
 .rate-circle svg {
-    transform: rotate(-90deg);
+    transform: rotate(0deg);
 }
 
 .rate-bg {
@@ -329,8 +329,6 @@
     font-size: 0.5rem;
     font-weight: var(--font-weight-bold);
     text-anchor: middle;
-    transform: rotate(90deg);
-    transform-origin: center;
 }
 
 .rate-info {

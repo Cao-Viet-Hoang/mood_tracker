@@ -294,8 +294,14 @@ const DashboardView = {
         if (this.currentRange === 'month') {
             const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
             totalDays = Math.min(daysInMonth, today.getDate());
+        } else if (this.currentRange === 'week') {
+            // This week (Monday to Sunday) - calculate days from Monday to today
+            const dayOfWeek = today.getDay();
+            const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Monday is 1, Sunday is 0
+            totalDays = daysSinceMonday + 1; // +1 to include today
         } else {
-            totalDays = parseInt(this.currentRange);
+            // Last N days (should be a number like '7', '30')
+            totalDays = parseInt(this.currentRange) || 0;
         }
 
         // Count unique dates in entries
