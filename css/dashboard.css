@@ -407,6 +407,17 @@
         max-width: 50px;
     }
 
+    .mood-axis {
+        height: 120px;
+    }
+
+    /* Adjust mood label positions for desktop 120px height */
+    .mood-axis .mood-label:nth-child(1) { top: 12px; }  /* 😄 Great - mood 5 */
+    .mood-axis .mood-label:nth-child(2) { top: 36px; }  /* 😊 Good - mood 4 */
+    .mood-axis .mood-label:nth-child(3) { top: 60px; }  /* 😐 Okay - mood 3 */
+    .mood-axis .mood-label:nth-child(4) { top: 84px; }  /* 😔 Bad - mood 2 */
+    .mood-axis .mood-label:nth-child(5) { top: 108px; } /* 😢 Very Bad - mood 1 */
+
     .trend-line {
         height: 120px;
     }
