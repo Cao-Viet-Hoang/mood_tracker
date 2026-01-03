@@ -254,8 +254,6 @@ accounts/{username}/entries/{dateKey}
   - dateKey: string (YYYY-MM-DD)
   - moodType: number (1-5)
   - note: string (optional)
-  - createdAt: timestamp
-  - updatedAt: timestamp
 ```
 
 ---
