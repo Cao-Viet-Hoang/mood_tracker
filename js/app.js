@@ -173,6 +173,7 @@ const App = {
         TodayView.init();
         CalendarView.init();
         DashboardView.init();
+        StatsView.init();
 
         // Refresh today view to load existing entry
         TodayView.refresh();

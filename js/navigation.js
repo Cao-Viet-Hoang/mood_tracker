@@ -22,7 +22,7 @@ const Navigation = {
 
     /**
      * Switch to a different view
-     * @param {string} viewName - View name ('today' | 'calendar' | 'dashboard')
+     * @param {string} viewName - View name ('today' | 'calendar' | 'dashboard' | 'stats')
      */
     switchView(viewName) {
         const elements = UI.getElements();
@@ -41,6 +41,9 @@ const Navigation = {
 
         elements.dashboardView.classList.toggle('active', viewName === 'dashboard');
         elements.dashboardView.classList.toggle('hidden', viewName !== 'dashboard');
+
+        elements.statsView.classList.toggle('active', viewName === 'stats');
+        elements.statsView.classList.toggle('hidden', viewName !== 'stats');
 
         this.currentView = viewName;
 
@@ -62,6 +65,9 @@ const Navigation = {
                 break;
             case 'dashboard':
                 DashboardView.refresh();
+                break;
+            case 'stats':
+                StatsView.refresh();
                 break;
         }
     },

@@ -28,6 +28,7 @@ const UI = {
             todayView: document.getElementById('todayView'),
             calendarView: document.getElementById('calendarView'),
             dashboardView: document.getElementById('dashboardView'),
+            statsView: document.getElementById('statsView'),
 
             // Today View
             currentDate: document.getElementById('currentDate'),
