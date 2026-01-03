@@ -177,10 +177,29 @@ const DashboardView = {
     /**
      * Update summary cards (total entries, week, month, streak)
      */
-    updateSummaryCards() {
+    async updateSummaryCards() {
         const totalEntries = this.entries.length;
-        const currentStreak = this.calculateCurrentStreak(this.entries);
-        const longestStreak = this.calculateLongestStreak(this.entries);
+        
+        // Get streak from cache with fallback to calculation
+        const userId = Auth.getUserId();
+        let currentStreak = 0;
+        let longestStreak = 0;
+        
+        try {
+            const streakData = await StreakManager.getStreak(userId, this.entries);
+            currentStreak = streakData.currentStreak;
+            longestStreak = streakData.longestStreak;
+            
+            if (streakData.fromCache) {
+                console.log('[Dashboard] Using cached streak data');
+            } else {
+                console.log('[Dashboard] Calculated and cached streak data');
+            }
+        } catch (error) {
+            console.error('[Dashboard] Error getting streak, using fallback calculation:', error);
+            currentStreak = this.calculateCurrentStreak(this.entries);
+            longestStreak = this.calculateLongestStreak(this.entries);
+        }
 
         // Update summary cards
         const summaryCards = document.querySelectorAll('.summary-value');

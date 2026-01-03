@@ -272,6 +272,15 @@ const CalendarView = {
             // Save to Firestore
             await docRef.set(entry, { merge: true });
 
+            // Update streak cache after saving entry
+            try {
+                await StreakManager.updateStreakOnEntryChange(userId);
+                console.log('[Calendar] Streak cache updated after entry save');
+            } catch (streakError) {
+                console.error('[Calendar] Error updating streak cache:', streakError);
+                // Don't throw - entry was saved successfully
+            }
+
             // Update local cache
             this.entries[this.selectedDate] = {
                 moodType,
