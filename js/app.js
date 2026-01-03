@@ -10,8 +10,6 @@ const App = {
      * Initialize the application
      */
     async init() {
-        console.log('Initializing Mood Tracker...');
-
         // Initialize UI module first (caches DOM elements)
         UI.init();
 
@@ -28,8 +26,6 @@ const App = {
             // Show login modal
             UI.getElements().loginModal.classList.add('active');
         }
-
-        console.log('Mood Tracker initialized');
     },
 
     /**

@@ -50,7 +50,6 @@ const Auth = {
                 displayName: accountData.displayName || username
             });
 
-            console.log('Login successful:', this.currentUser);
             return this.currentUser;
         } catch (error) {
             console.error('Login error:', error);
@@ -64,7 +63,6 @@ const Auth = {
     logout() {
         this.currentUser = null;
         Storage.clearUserSession();
-        console.log('User logged out');
     },
 
     /**
@@ -152,7 +150,6 @@ const Auth = {
                 displayName: displayName.trim()
             });
 
-            console.log('Display name updated:', displayName.trim());
         } catch (error) {
             console.error('Error updating display name:', error);
             throw error;
@@ -192,7 +189,6 @@ const Auth = {
                 displayName: accountData.displayName || session.displayName || session.username
             };
 
-            console.log('Session restored for:', session.username);
             return true;
         } catch (error) {
             console.error('Error restoring session:', error);

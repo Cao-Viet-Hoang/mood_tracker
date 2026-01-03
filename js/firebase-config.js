@@ -25,7 +25,6 @@ const FirebaseConfig = {
 
             // Check if Firebase is already initialized
             if (this.isInitialized) {
-                console.log('Firebase already initialized');
                 return true;
             }
 
@@ -34,7 +33,6 @@ const FirebaseConfig = {
             this.db = firebase.firestore();
 
             this.isInitialized = true;
-            console.log('Firebase initialized successfully');
             return true;
         } catch (error) {
             console.error('Firebase initialization error:', error);
@@ -117,7 +115,6 @@ const FirebaseConfig = {
                 this.app = null;
                 this.db = null;
                 this.isInitialized = false;
-                console.log('Firebase reset successfully');
             }).catch(error => {
                 console.error('Error resetting Firebase:', error);
             });

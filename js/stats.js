@@ -107,8 +107,6 @@ const StatsView = {
             const startDateKey = Utils.getDateKey(startDate);
             const endDateKey = Utils.getDateKey(today);
 
-            console.log(`[Stats] Loading range: ${range} days, from ${startDateKey} to ${endDateKey}`);
-
             // Query entries for range
             const querySnapshot = await db.collection('accounts')
                 .doc(userId)
@@ -124,7 +122,7 @@ const StatsView = {
                 entries.push(doc.data());
             });
 
-            console.log(`[Stats] Loaded ${entries.length} entries for range: ${range} (${startDateKey} to ${endDateKey})`);
+
             this.updateCharts(entries);
         } catch (error) {
             console.error('Error loading data for range:', error);
@@ -162,7 +160,7 @@ const StatsView = {
                 entries.push(doc.data());
             });
 
-            console.log(`[Stats] Loaded ${entries.length} entries for custom range: ${startDate} - ${endDate}`);
+
             this.updateCharts(entries);
         } catch (error) {
             console.error('Error loading data for custom range:', error);

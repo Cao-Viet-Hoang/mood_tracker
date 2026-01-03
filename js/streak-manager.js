@@ -228,7 +228,6 @@ const StreakManager = {
      */
     async updateStreakOnEntryChange(userId) {
         try {
-            console.log('[StreakManager] Updating streak after entry change');
             return await this.calculateAndSaveStreak(userId);
         } catch (error) {
             console.error('[StreakManager] Error updating streak on entry change:', error);
