@@ -76,7 +76,7 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: var(--spacing-5);
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: var(--spacing-3);
 }
 
@@ -84,6 +84,7 @@
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
     color: var(--text-primary);
+    flex-shrink: 0;
 }
 
 .view-date {

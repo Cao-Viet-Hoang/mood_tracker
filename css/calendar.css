@@ -10,15 +10,20 @@
 .calendar-nav {
     display: flex;
     align-items: center;
-    gap: var(--spacing-3);
+    gap: 8px;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .calendar-month {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
     color: var(--text-primary);
-    min-width: 150px;
+    min-width: 120px;
     text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Calendar Container */
@@ -270,5 +275,31 @@
 
     .day-mood {
         font-size: 1.25rem;
+    }
+}
+
+/* Mobile optimizations for small screens (iPhone 13 Pro, etc.) */
+@media (max-width: 420px) {
+    .view-title {
+        font-size: var(--font-size-xl);
+    }
+
+    .calendar-month {
+        font-size: var(--font-size-base);
+        min-width: 90px;
+    }
+
+    .calendar-nav {
+        gap: 4px;
+    }
+
+    .calendar-nav .btn-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .calendar-nav .btn-icon svg {
+        width: 18px;
+        height: 18px;
     }
 }
