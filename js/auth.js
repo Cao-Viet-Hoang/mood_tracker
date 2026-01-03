@@ -40,11 +40,15 @@ const Auth = {
             }
 
             this.currentUser = {
-                username: username
+                username: username,
+                displayName: accountData.displayName || username
             };
 
             // Save session
-            Storage.saveUserSession({ username });
+            Storage.saveUserSession({ 
+                username,
+                displayName: accountData.displayName || username
+            });
 
             console.log('Login successful:', this.currentUser);
             return this.currentUser;
@@ -96,6 +100,66 @@ const Auth = {
     },
 
     /**
+     * Get current user display name
+     * @returns {string|null}
+     */
+    getDisplayName() {
+        return this.currentUser?.displayName || this.currentUser?.username || null;
+    },
+
+    /**
+     * Check if current user has display name set
+     * @returns {boolean}
+     */
+    hasDisplayName() {
+        const accountData = this.currentUser;
+        return accountData && accountData.displayName && accountData.displayName !== accountData.username;
+    },
+
+    /**
+     * Update display name for current user
+     * @param {string} displayName - New display name
+     * @returns {Promise<void>}
+     */
+    async updateDisplayName(displayName) {
+        try {
+            if (!this.currentUser) {
+                throw new Error('No user logged in');
+            }
+
+            if (!displayName || displayName.trim().length === 0) {
+                throw new Error('Display name cannot be empty');
+            }
+
+            if (displayName.length > 50) {
+                throw new Error('Display name is too long (max 50 characters)');
+            }
+
+            const db = FirebaseConfig.getDb();
+            const username = this.currentUser.username;
+
+            // Update in Firestore
+            await db.collection('accounts').doc(username).update({
+                displayName: displayName.trim()
+            });
+
+            // Update in memory
+            this.currentUser.displayName = displayName.trim();
+
+            // Update session
+            Storage.saveUserSession({
+                username: this.currentUser.username,
+                displayName: displayName.trim()
+            });
+
+            console.log('Display name updated:', displayName.trim());
+        } catch (error) {
+            console.error('Error updating display name:', error);
+            throw error;
+        }
+    },
+
+    /**
      * Try to restore session from localStorage
      * @returns {Promise<boolean>} True if session restored successfully
      */
@@ -121,8 +185,11 @@ const Auth = {
                 return false;
             }
 
+            const accountData = accountDoc.data();
+
             this.currentUser = {
-                username: session.username
+                username: session.username,
+                displayName: accountData.displayName || session.displayName || session.username
             };
 
             console.log('Session restored for:', session.username);

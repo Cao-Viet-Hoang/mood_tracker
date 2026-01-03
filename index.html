@@ -558,6 +558,34 @@
         </div>
     </div>
 
+    <!-- Display Name Modal -->
+    <div id="displayNameModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Welcome! 🌸</h2>
+                <p class="modal-subtitle">How can I call you?</p>
+            </div>
+            <form id="displayNameForm" class="display-name-form">
+                <div class="form-group">
+                    <label for="displayNameInput">Display Name</label>
+                    <input type="text" id="displayNameInput" class="form-input" placeholder="Enter your display name" maxlength="50" required>
+                    <span class="form-hint">This is how we'll greet you in the app</span>
+                </div>
+                <div id="displayNameError" class="error-message hidden">
+                    <span class="error-icon">⚠️</span>
+                    <span class="error-text">Please enter a valid display name</span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <span class="btn-text">Continue</span>
+                    <span class="btn-loader hidden">
+                        <span class="spinner"></span>
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast" class="toast hidden">
         <span class="toast-icon">✓</span>

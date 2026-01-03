@@ -58,6 +58,9 @@ const App = {
     initLogoutHandler() {
         const elements = UI.getElements();
         elements.logoutBtn.addEventListener('click', () => this.handleLogout());
+        
+        // Display name form
+        elements.displayNameForm.addEventListener('submit', (e) => this.handleDisplayNameSubmit(e));
     },
 
     /**
@@ -158,7 +161,7 @@ const App = {
      * Called on successful login
      * @param {string} username - Logged in username
      */
-    onLoginSuccess(username) {
+    async onLoginSuccess(username) {
         const elements = UI.getElements();
 
         // Show app
@@ -178,8 +181,15 @@ const App = {
         // Refresh today view to load existing entry
         TodayView.refresh();
 
-        // Show welcome message
-        UI.showToast(`Welcome back, ${username}!`);
+        // Check if user has display name
+        if (!Auth.hasDisplayName()) {
+            // Show display name modal
+            UI.showDisplayNameModal();
+        } else {
+            // Show welcome message
+            const displayName = Auth.getDisplayName();
+            UI.showToast(`Welcome back, ${displayName}!`);
+        }
     },
 
     /**
@@ -197,6 +207,48 @@ const App = {
         UI.showLoginModal();
 
         UI.showToast('Logged out successfully');
+    },
+
+    /**
+     * Handle display name form submission
+     * @param {Event} e - Submit event
+     */
+    async handleDisplayNameSubmit(e) {
+        e.preventDefault();
+
+        const elements = UI.getElements();
+        const displayName = elements.displayNameInput.value.trim();
+
+        if (!displayName) {
+            UI.showDisplayNameError('Please enter a display name');
+            return;
+        }
+
+        if (displayName.length > 50) {
+            UI.showDisplayNameError('Display name is too long (max 50 characters)');
+            return;
+        }
+
+        // Set loading state
+        const submitBtn = elements.displayNameForm.querySelector('button[type="submit"]');
+        UI.setButtonLoading(submitBtn, true);
+        UI.hideDisplayNameError();
+
+        try {
+            // Update display name
+            await Auth.updateDisplayName(displayName);
+
+            // Hide modal
+            UI.hideDisplayNameModal();
+
+            // Show welcome message
+            UI.showToast(`Welcome, ${displayName}! 🌸`);
+        } catch (error) {
+            console.error('Display name update error:', error);
+            UI.showDisplayNameError(error.message || 'Failed to update display name');
+        } finally {
+            UI.setButtonLoading(submitBtn, false);
+        }
     },
 
     /**

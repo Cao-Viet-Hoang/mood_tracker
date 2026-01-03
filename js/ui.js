@@ -58,6 +58,12 @@ const UI = {
             // Navigation
             navItems: document.querySelectorAll('.nav-item'),
 
+            // Display Name Modal
+            displayNameModal: document.getElementById('displayNameModal'),
+            displayNameForm: document.getElementById('displayNameForm'),
+            displayNameInput: document.getElementById('displayNameInput'),
+            displayNameError: document.getElementById('displayNameError'),
+
             // States
             toast: document.getElementById('toast'),
             loadingOverlay: document.getElementById('loadingOverlay')
@@ -214,6 +220,47 @@ const UI = {
         setTimeout(() => {
             modal.classList.add('hidden');
         }, 300);
+    },
+
+    /**
+     * Show display name modal
+     */
+    showDisplayNameModal() {
+        this.elements.displayNameModal.classList.remove('hidden');
+        void this.elements.displayNameModal.offsetWidth;
+        this.elements.displayNameModal.classList.add('active');
+        this.elements.displayNameInput.value = '';
+        this.hideDisplayNameError();
+        this.elements.displayNameInput.focus();
+    },
+
+    /**
+     * Hide display name modal
+     */
+    hideDisplayNameModal() {
+        this.elements.displayNameModal.classList.remove('active');
+        setTimeout(() => {
+            this.elements.displayNameModal.classList.add('hidden');
+        }, 300);
+    },
+
+    /**
+     * Show display name error message
+     * @param {string} message - Error message
+     */
+    showDisplayNameError(message) {
+        const errorText = this.elements.displayNameError.querySelector('.error-text');
+        if (errorText) {
+            errorText.textContent = message;
+        }
+        this.elements.displayNameError.classList.remove('hidden');
+    },
+
+    /**
+     * Hide display name error message
+     */
+    hideDisplayNameError() {
+        this.elements.displayNameError.classList.add('hidden');
     }
 };
 
